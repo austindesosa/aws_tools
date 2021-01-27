@@ -1,0 +1,39 @@
+{
+  "fake_AWS_acct1": {
+    "email": "fakeaddress101@gmail.com",
+    "account_id": "000111222333",
+    "buckets": [
+      "fakebucket123",
+      "not-my-s3bucket87"
+    ],
+    "iam_users": {
+      "s3iam": {
+        "access_key_id": "ABC123BLABLABLA",
+        "secret_acccess_key": "erty2345biyhbsdfx123"
+      },
+      "ec2iam": {
+        "access_key_id": "N34GIKHJKVH36LKR",
+        "secret_acccess_key": "aubb2345ndq80sdfxh3"
+      }
+    }
+  },
+  "fake_AWS_acct2": {
+    "email": "notmyemail@fakemail.com",
+    "account_id": "100432000000",
+    "buckets": [
+      "nota864bucket",
+      "photobucket54",
+      "fakebucket145"
+    ],
+    "iam_users": {
+      "s3iam": {
+        "access_key_id": "QWER245U5UFGH20X",
+        "secret_acccess_key": "eq3dfghjcuygf234xin3"
+      },
+      "ec2iam": {
+        "access_key_id": "T34DFIYGKJVH3REW",
+        "secret_acccess_key": "ckuywg76ugawdpoij574"
+      }
+    }
+  }
+}
