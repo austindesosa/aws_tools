@@ -11,7 +11,7 @@ This file is meant to use boto3 to connect with AWS resources on a local machine
 
 import os
 
-INSTALL_BOTO = False #boolean whether you need to pip install boto3
+INSTALL_BOTO = True #boolean whether you need to pip install boto3
 #True if you need to install it, False if boto3 ois already pip installed
 if INSTALL_BOTO:
   os.system('pip install boto3') 
@@ -67,9 +67,21 @@ def quick_iam_dxry(json_file = 'aws_accounts.json',
   json_file : string, name of JSON file in your directory containing the needed information
   acct_name : string, name of AWS account to which IAM users belong
   key_name : string, dictionary key whose value is a dictionary containing IAM users and their credentials
+  This returns a dictionary containimg the credentials for all the IAM users associated with an AWs account
   '''
   ret = json.load(open(json_file))[acct_name][key_name]
   return ret
+
+def iam_from_creds(iam_name, aki, sak):
+  '''Returns nested dictionary containing one set of IAM credentials
+  iam_name : string, name of IAM user
+  aki : string, Access key ID for that IAM user
+  sak : string, Secret access key for that IAM user
+  Returns dictionary of form similar to the one stored in JSON credential file
+  This is for when you just have the IAM user name, the access key ID, and the secret access key
+  '''
+  d = {'access_key_id':aki, 'secret_access_key': sak}
+  return {iam_name : d}
 
 def update_json(dxry,
                 bucket, 
