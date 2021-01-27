@@ -4,3 +4,4 @@ sudo yum install python37 -y
 curl -O https://bootstrap.pypa.io/get-pip.py
 python3 get-pip.py --user
 
+sudo yum install git -y
