@@ -11,7 +11,7 @@ This file is meant to use boto3 to connect with AWS resources on a local machine
 
 import os
 
-INSTALL_BOTO = True #boolean whether you need to pip install boto3
+INSTALL_BOTO = False #boolean whether you need to pip install boto3
 #True if you need to install it, False if boto3 ois already pip installed
 if INSTALL_BOTO:
   os.system('pip install boto3') 
@@ -123,13 +123,13 @@ def upload_to_dataset(df,
   df.append(dx)
   return dx
 
-def service(service_name, iam_name, iam_dxry, region='us-west-2', func = boto3.client):
+def service(service_name, iam_name, iam_dxry, region='us-west-2', func = boto3.resource):
   '''Returns an object mean to access an AWS service, as returned by boto3.resource or  boto3.client methods
   service_name : string, name of desired AWS service
   iam_name : string, name of IAM user whose credentials will be used to access the service,
   iam_dxry : dictionary, keys are IAM usernames and values are dictionaries containing IAM credentials,
   region : string , name of AWS region hosting the service,
-  func : boto3.client | boto3.resource, Python function to connect to the service
+  func : boto3.resource | boto3.client, Python function to connect to the service
   Returns object of the same type as returned by func
   '''
   creds = iam_dxry[iam_name]

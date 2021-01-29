@@ -1,0 +1,10 @@
+#!/bin/bash
+sudo yum update -y
+sudo yum install python37 -y
+curl -O https://bootstrap.pypa.io/get-pip.py
+python3 get-pip.py --user
+
+sudo yum install git -y
+pip3 install boto3 --user
+pip3 install numpy --user
+pip3 install pandas --user
