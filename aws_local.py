@@ -35,10 +35,20 @@ import boto3
 
 
 
-MAKE_REQS = True #Boolean telling whether you should make a requirements.txt file
+MAKE_REQS = False #Boolean telling whether you should make a requirements.txt file
 REQS_NAME = 'aws_requirements.txt' #name of file containing requirements
 if MAKE_REQS:
   os.system(f'pip freeze > {REQS_NAME}')
+
+def shell_cmd(fname):
+  '''fname : string, filename of .txt file in this directory
+  Executes the shell commands in fname
+  returns int, exit code for os.system'''
+  x = None
+  with open(fname) as f:
+    x = f.read()
+  return os.system(x)
+
 
 REGION = 'us-west-2'
 
