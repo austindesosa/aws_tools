@@ -149,3 +149,47 @@ def service(service_name, iam_name, iam_dxry, region='us-west-2', func = boto3.r
              aws_access_key_id = aki,
              aws_secret_access_key = sak)
   return ret
+
+def process_iam(csv_name = 'new_user_credentials.csv',
+                json_name = 'aws_accounts.json',
+                aws_json_name = 'secrets/aws_accounts.json',
+                iam_dxry_name = 'iam_users',
+                acct_name = 'austin_poyz',
+                s3_name = 's3iam', 
+                bucket_name = 'pythonbucket6071',
+                s3_service = None,
+                return_objects = True
+                ):
+  '''csv_name : string, name of .csv file provided by AWS containing IAM user credentials
+  json_name : string, name of .json file in this directory containing information about your accounts
+              and ytheir IAM users
+  aws_json_name : name of the JSON file with account information as known in your S3 bucket
+  iam_dxry_name : string, key whose value is dictionary of all IAM users for an AWS account
+                  in the dictionary form of json_name
+  acct_name : string, name of AWS account associated with your IAM user
+  s3_name : string, name of IAM user with S3 permission mentioned in json_name
+  bucket_name : string, name of S3 bucket where you will keep JSON file
+  s3_service : boto3.resource('s3') object or None, object to connect with S3
+  return_objects : boolean, whether or not to return a tuple of objects
+  If return_objects is True, returns tuple containing 
+  ( boto3.resources.factory.s3 , boto3.resources.factory.s3.Bucket ) datatypes
+  Otherwise returns None
+  '''
+  cred_key, cred_val = iam_credentials(csv_name)
+  acct_dxry = json.load(open(json_name))
+  iam_dxry = acct_dxry[acct_name][iam_dxry_name]
+  iam_dxry[cred_key] = cred_val
+  if (not s3_service):
+    s3_service = service('s3', 
+                         iam_name = s3_name, 
+                         iam_dxry = iam_dxry, 
+                         func = boto3.resource)
+  bucket = s3_service.Bucket(bucket_name)
+  update_json(dxry = acct_dxry,
+              bucket = bucket,
+              your_fname = json_name,
+              aws_fname = aws_json_name)
+  ret = None
+  if return_objects:
+    ret = (s3_service , bucket)
+  return ret
