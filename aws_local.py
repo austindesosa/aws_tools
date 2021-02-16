@@ -113,8 +113,8 @@ def upload_to_dataset(df,
                      aws_fname, 
                      bucket,
                      y_label = 0, 
-                     key_name='filename',
-                     value_name='y_label'
+                     key_str='filename',
+                     value_str='y_label'
                      ):
   '''Uploads file to bucket, gives it a label for machine learning,
   logs that information to a pandas.DataFrame
@@ -127,8 +127,8 @@ def upload_to_dataset(df,
   value_name : string, column label containing machine learning labels
   Returns dictionary whose values are the filename and the machine learning label'''
   bucket.upload_file(your_fname, aws_fname)
-  dx = {key_name : aws_fname,
-       value_name : y_label,
+  dx = {key_str : aws_fname,
+       value_str : y_label,
        }
   df.append(dx)
   return dx
@@ -167,7 +167,7 @@ def s3_and_bucket(bucket_name = 'pythonbucket6071',
   iam_dxry = acct_dxry[acct_name][iam_dxry_name]
   s3 = service('s3', 
                iam_name = s3_name,
-               iam_dxry = iam_dxry
+               iam_dxry = iam_dxry,
                func = boto3.resource)
   bucket  = s3.Bucket(bucket_name)
   return s3, bucket
