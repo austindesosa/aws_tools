@@ -215,3 +215,11 @@ def process_iam(csv_name = 'new_user_credentials.csv',
   if return_objects:
     ret = (s3_service , bucket)
   return ret
+
+def make_ni_dxry(subnet, sg, device_index = 0, public_ip = True):
+  ret = {}
+  ret['SubnetId'] = subnet.id   
+  ret['DeviceIndex']=device_index   
+  ret['AssociatePublicIpAddress']=public_ip   
+  ret['Groups']=[sg.group_id]
+  return ret
