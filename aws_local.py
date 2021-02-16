@@ -150,6 +150,28 @@ def service(service_name, iam_name, iam_dxry, region='us-west-2', func = boto3.r
              aws_secret_access_key = sak)
   return ret
 
+def s3_and_bucket(bucket_name = 'pythonbucket6071',
+                  iam_dxry_name = 'iam_users',
+                  s3_name = 's3iam',
+                  json_name = 'aws_accounts.json',
+                  acct_name = 'austin_poyz'):
+  '''Returns tuple containing (ServiceResource , Bucket) objects 
+  from s3.resource.factory.s3 library.
+  bucket_name : string, name of s3 bucket you want to access with your Bucket object
+  iam_dxry_name : string, name of inner dictionary containing IAM user info
+  s3_name : string, name of IAM user with progtrammatic access to that S3 bucket
+  json_name : name of JSON file containing AWS account info including IAM users
+  acct_name : AWS account associated with your IAM user, as listed in the JSON file
+  '''
+  acct_dxry = json.load(open(json_name))
+  iam_dxry = acct_dxry[acct_name][iam_dxry_name]
+  s3 = service('s3', 
+               iam_name = s3_name,
+               iam_dxry = iam_dxry
+               func = boto3.resource)
+  bucket  = s3.Bucket(bucket_name)
+  return s3, bucket
+
 def process_iam(csv_name = 'new_user_credentials.csv',
                 json_name = 'aws_accounts.json',
                 aws_json_name = 'secrets/aws_accounts.json',
