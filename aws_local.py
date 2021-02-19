@@ -223,3 +223,86 @@ def make_ni_dxry(subnet, sg, device_index = 0, public_ip = True):
   ret['AssociatePublicIpAddress']=public_ip   
   ret['Groups']=[sg.group_id]
   return ret
+
+def basic_vpc_launch(vpc_cidr = '172.16.0.0/16',
+               vpc_name = 'my_vpc',
+               subnet_cidr = '172.16.1.0/24',
+               sg_groupname = 'SSH-ONLY',
+               sg_description = 'Only allow SSH traffic',
+               ip_protocol = 'tcp',
+               ingress_cidr = '0.0.0.0/0',
+               from_port = 22,
+               to_port = 22,
+               min_count = 1, 
+               max_count = 1,
+               region = 'us-west-2',
+               bootstrap_file = 'setup_script.txt',
+               ec2_json = 'aws_ec2.json',
+               device_index = 0,
+               public_ip = True,
+               ec2_service = None,
+               ec2_iam_name = 'ec2iam',
+               iam_dxry_name = 'iam_users',
+               acct_name = 'austin_poyz',
+               json_name = 'aws_accounts.json',
+               key_name = 'key0123'):
+  ret = {}
+  iam_dxry = quick_iam_dxry(json_name, acct_name, iam_dxry_name)
+  if not ec2_service:
+    ec2_service = service('ec2',
+                          iam_name = 'ec2iam', 
+                          iam_dxry = iam_dxry,
+                          func = boto3.resource
+                          )
+  ret['ec2_service'], ret['ec2_client']=ec2_service, ec2_service.meta.client 
+  vpc = ec2_service.create_vpc(CidrBlock = vpc_cidr)
+  vpc.wait_until_available()
+  ret['vpc']=vpc
+  tag = {'Key':'Name', 'Value' : vpc_name}
+  vpc.create_tags(Tags = [tag])
+  vpc.wait_until_available()
+  internetgateway = ec2_service.create_internet_gateway()
+  vpc.attach_internet_gateway(InternetGatewayId = internetgateway.id)
+  ret['internet_gateway'] = internetgateway
+  print(f'internetgateway.id = {internetgateway.id} \n')
+  routetable = vpc.create_route_table()
+  ret['route_table'] = routetable
+  try:
+    route = routetable.create_route(DestinationCidrBlock = '0.0.0.0/0',
+                           GatewayId = internetgateway.id)
+  except:
+    print('Launch failed \n')
+    ret['ec2_client'].delete_vpc(VpcId = vpc.id)
+    print('VPC deleted, sorry \n')
+    return ret
+  ret['route'] = route
+  subnet = ec2_service.create_subnet(CidrBlock = subnet_cidr,
+                             VpcId = vpc.id)
+  ret['subnet'] = subnet
+  routetable.associate_with_subnet(SubnetId = subnet.id)
+  securitygroup = ec2_service.create_security_group(GroupName = sg_groupname,
+                                            Description = sg_description,
+                                            VpcId = vpc.id)
+  securitygroup.authorize_ingress(CidrIp = ingress_cidr,
+                                  IpProtocol = ip_protocol,
+                                  FromPort = from_port,
+                                  ToPort = to_port)
+  ret['security_group'] = securitygroup 
+  ni_dxry = make_ni_dxry(subnet=subnet, 
+                         sg = securitygroup,
+                         device_index = device_index,
+                         public_ip = public_ip)
+  user_data = None
+  if bootstrap_file:
+    user_data = open(bootstrap_file).read()
+  ec2_d = json.load(open(ec2_json))
+  instances = ec2_service.create_instances(ImageId = ec2_d['ImageId'],
+                    InstanceType = ec2_d['InstanceType'],
+                    MaxCount=1,
+                    MinCount=1,
+                    NetworkInterfaces = [ni_dxry],
+                    UserData = user_data,
+                    KeyName = 'key0123')
+  return ret
+
+  
